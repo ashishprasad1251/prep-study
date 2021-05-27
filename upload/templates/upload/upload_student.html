@@ -1,0 +1,430 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Add Student</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" >
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+   <style>
+    th{
+        color:#fff;
+            }
+</style>
+</head>
+<body class="body">
+<div class="header">
+<div class="logo">
+
+<img src="{% static 'images/Prep-Logo.png' %}" />
+</div>
+<div class="right">
+<select _ngcontent-dee-c62="" name="siteLocale" id="lang" class="form-control text-dark bg-light ng-untouched ng-pristine ng-valid"><option _ngcontent-dee-c62="" value="en" class="ng-star-inserted"> English </option><option _ngcontent-dee-c62="" value="hi" class="ng-star-inserted"> हिंदी </option><!----></select>
+
+<i aria-hidden="true" class="fa fa-bell bell-icon"></i>
+
+<img src="{% static 'images/user-icon.png' %}" style="height: 34px;width: 34px;border-radius: 50%;position: relative;top: 0;margin: 0 7px;float: left;" />
+
+<a _ngcontent-dee-c62="" class="btn btn-link show-text-menu">Help</a>
+</div>
+</div>
+  <div class="container">
+  <div class="update_pan">
+  <span style="width: 100%;float: left;font-size: 21px">Upload Student File</span>
+<!-- <a href="" class="cale_view"><i class="fa fa-calendar" aria-hidden="true"></i></a> -->
+<!-- <a href="" class="create_new"><i class="fa fa-plus" aria-hidden="true"></i>Create New</a>  -->
+</div>
+<div class="main_container">
+<div class="import">
+<div class="downlo_file">
+
+<div class="setp2">
+<span class="file_titl">Use format shown below</span>
+
+<div class="class_nameupload">
+
+
+<input type="file" id="file-excel">
+</div>
+<div class="class_nameupload btn_class">
+<a class="btn_submit" onClick="upload_file();">Upload File</a>
+
+</div>
+</div>
+<div class="setp1">
+<!-- <span class="file_titl">Export File</span> -->
+<a href="" class="file" download="">
+<span>Click here to download sample file</span>
+
+<img src="{% static 'images/excel.png' %}" />
+</a>
+
+</div>
+</div>
+</div>
+     <div id="validation"></div>
+</div>
+</div>
+</div>
+
+
+
+  <link rel="stylesheet"  href="{% static 'css/homenew.css' %}">  <link rel="stylesheet" href="{% static 'css/form.css' %}">   <link rel="stylesheet" href="{% static 'css/reportsnew.css' %}">
+  
+</body>
+
+<script type="text/javascript">
+
+    function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = cookies[i].trim();
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+		}
+
+var csrftoken = getCookie('csrftoken');
+
+const fileSelector = document.getElementById('file-excel');
+
+fileSelector.addEventListener('change', (event) => {
+    file = event.target.files;
+    console.log(file);
+  });
+
+
+ function buildTable(data,col){
+		var all_rows="";
+
+
+		if (col == "Sr. No"){
+
+		for (var i = 0; i < data.length; i++){
+		   var row = `<tr>
+							<td>${data[i].wrong_sno}</td>
+							<td>Make it an integer for further processing to occur</td>
+					  </tr>`
+			all_rows += row
+
+			}
+
+		}
+
+		else {
+		for (var i = 0; i < data.length; i++){
+		  var row = `<tr>
+							<td>${data[i].wrong_sno}</td>
+							<td>${data[i].wrong_value}</td>
+					  </tr>`
+			all_rows += row
+
+       }
+		}
+
+
+	return all_rows
+	}
+
+
+
+  function buildTableEmpty(data,col){
+		var all_rows="";
+
+        if (col == "Sr. No"){
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].empty_sno}</td>
+							<td>Make it an integer for further processing to occur</td>
+					  </tr>`
+			all_rows += row
+		}
+		}
+
+		else{
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].empty_sno}</td>
+							<td>${data[i].empty_value}</td>
+					  </tr>`
+			all_rows += row
+		}
+
+
+		}
+	return all_rows
+	}
+
+
+
+
+	function upload_file()
+           {
+
+
+           console.log(file)
+           let formData = new FormData()
+           formData.append('file', file[0])
+
+               var url= '/upload/' ;
+		 fetch(url, {
+				method:'POST',
+				headers:{
+					'X-CSRFToken':csrftoken
+				},
+				body:formData
+			}).then((resp) => resp.json())
+			.then(function(data){
+			var wrapper = document.getElementById("validation")
+			wrapper.innerHTML = ''
+
+			if(data['db_stored']== "false"){
+
+			 var heading0 = ` <h4 style="color:blue">Table has not been stored in Database. Please correct the following mistakes in the uploaded document and Re-upload the document</h4> `
+
+
+			}
+
+			else{
+
+			 var heading0 = ` <h4 style="color:green">Uploaded Document was correct and it is Stored in the Database</h4> `
+             var heading1 = ` <p >All columns were correct and in proper format</p>`
+			}
+
+			wrapper.innerHTML += heading0;
+
+			if (data['validation'][0]=="col header wrong"){
+
+			if(data['validation'][1][0]=="wrong"){
+
+			var heading1 = ` <h4 style="color:red"> Wrong Column Header</h4>
+			<p >Expected column heading to be <b style="color:green"> ${data['validation'][1][1][0]} </b>
+			at position no <b style="color:green">  ${data['validation'][1][1][1]} </b> .  But got column <b style="color:red" >  ${data['validation'][1][1][2]} </b> instead
+			</p> `;
+
+			}
+
+			else if(data['validation'][1][0]=="extra"){
+
+			var heading1 = ` <h4 style="color:red"> Wrong Column Header</h4>
+			<p >The following columns are mentioned in your file <b style="color:red"> [ ${data['validation'][1][1]} ]</b>
+			but is not present in the format
+			</p> `;
+
+
+
+			}
+
+			else if(data['validation'][1][0]=="missing"){
+
+
+
+			var heading1 = ` <h4 style="color:red"> Wrong Column Header</h4>
+			<p >The following columns are missing <b style="color:red"> [ ${data['validation'][1][1]} ]</b>
+			in your uploaded file
+			</p> `;
+
+
+			}
+
+
+
+
+			}
+
+
+
+           else if (data['validation'][0]=="sno not unique"){
+
+           var heading1 = ` <h4 style="color:red">Values in Column Sno is not unique </h4>
+			<p >The following Sno <b style="color:red"> [ ${data['validation'][1][0]} ]</b> is repeated
+			</p> `;
+
+
+           }
+
+
+
+
+			else if (data['validation'][0]=="wrong col"){
+
+			var all_rows=buildTable(data['validation'][1][1],data['validation'][1][0]);
+
+			var heading1 = ` <h4 style="color:red">Some Values of Column [ ${data['validation'][1][0]} ]  is in wrong Format </h4>
+
+
+
+
+			<p >Following Rows has been identified to be in Wrong format </p>
+
+            <div style="float: left; width: 50%">
+
+
+            <table class="table table-bordered table-condensed">
+             <thead>
+                    <tr>
+                        <th style="text-align:center">Sno</th>
+                        <th style="text-align:center">${data['validation'][1][0]}</th>
+                    </tr>
+              </thead>
+
+                    <tbody>
+
+                    ${all_rows}
+
+                    </tbody>
+          </table>
+
+           <b style="color:green">Proper format defination to be followed for column [ ${data['validation'][1][0]} ] - ${data['validation'][1][2]}  </b>
+           </div>
+
+
+			 `;
+
+
+			}
+
+
+
+			else if (data['validation'][0]=="empty col"){
+
+			var all_rows=buildTableEmpty(data['validation'][1][1],data['validation'][1][0]);
+
+			var heading1 = ` <h4 style="color:red">Some Values of Column [ ${data['validation'][1][0]} ]  is empty </h4>
+
+
+
+
+			<p >Following Rows has been identified to be empty </p>
+
+            <div style="float: left; width: 50%">
+
+
+            <table class="table table-bordered table-condensed">
+             <thead>
+                    <tr>
+                        <th style="text-align:center">Sno</th>
+                        <th style="text-align:center">${data['validation'][1][0]}</th>
+                    </tr>
+              </thead>
+
+                    <tbody>
+
+                    ${all_rows}
+
+                    </tbody>
+          </table>
+
+
+           </div>
+
+
+			 `;
+
+
+
+
+			}
+
+			else if (data['validation'][0]=="empty & wrong col"){
+
+			var all_rows= buildTable(data['validation'][1][1],data['validation'][1][0]);
+			var all_rows1= buildTableEmpty(data['validation'][1][2],data['validation'][1][0]);
+
+			var heading1 = ` <h4 style="color:red">Some Values of Column [ ${data['validation'][1][0]} ]  is in <span style="font-weight:bold"> Wrong Format </span> and Some others are <span style="font-weight:bold"> Empty </span> </h4>
+
+
+
+
+			<p >Following Rows has been identified to be in <span style="font-weight:bold"> Wrong format </span> </p>
+
+            <div style="float: left; width: 50%">
+
+
+            <table class="table table-bordered table-condensed">
+             <thead>
+                    <tr>
+                        <th style="text-align:center">Sno</th>
+                        <th style="text-align:center">${data['validation'][1][0]}</th>
+                    </tr>
+              </thead>
+
+                    <tbody>
+
+                    ${all_rows}
+
+                    </tbody>
+          </table>
+
+
+
+           <p>Following Rows has been identified to be <span style="font-weight:bold"> Empty </span>  </p>
+
+
+
+
+            <table class="table table-bordered table-condensed">
+             <thead>
+                    <tr>
+                        <th style="text-align:center">Sno</th>
+                        <th style="text-align:center">${data['validation'][1][0]}</th>
+                    </tr>
+              </thead>
+
+                    <tbody>
+
+                    ${all_rows1}
+
+                    </tbody>
+          </table>
+
+          <b style="color:green">Proper format defination to be followed for column [ ${data['validation'][1][0]} ] - ${data['validation'][1][3]}  </b>
+
+          </div>
+
+
+			 `;
+
+
+			}
+
+
+
+			wrapper.innerHTML += heading1;
+
+
+
+
+
+
+
+
+
+
+			console.log('Data:', data)
+
+			})
+
+
+
+           }
+
+
+
+
+
+</script>
+</html>

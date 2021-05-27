@@ -1,0 +1,1 @@
+web: gunicorn edtech.wsgi --log-file -
